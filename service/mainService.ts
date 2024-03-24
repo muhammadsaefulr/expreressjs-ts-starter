@@ -89,7 +89,7 @@ class UserService {
       throw new ResponseError(401, "Email Or Password Incorrect");
     }
 
-    const defaultExp = 2 * 24 * 60 * 60;
+    const defaultExp = 2 * 4 * 60 * 60;
     const currentTime = new Date()
     const responseExpDate = new Date(currentTime.getTime() + (defaultExp * 1000))
 
