@@ -1,32 +1,53 @@
-import { Request, Response } from "express";
-import ErrorHandle from "../error/errorHandle";
+import { NextFunction, Request, Response } from "express";
 import UserService from "../service/mainService";
-import { userSchema } from "../validator/mainValidator";
+import { Users, authUser } from "../types/user.types";
 
 class UserController {
-  static async getAllUsers(req: Request, res: Response) {
+
+  static async authLoginUser(req: Request, res: Response, next: NextFunction){
     try {
-      const users = await UserService.getAllUsers();
-      res.status(200).json({ message: "Request Berhasil !", users });
-    } catch (err: any) {
-      ErrorHandle.handle(err, res);
+      const data: authUser = req.body
+
+      const executeAuth = await UserService.authUser(data)
+
+      res.status(200).json({message: "Login Berhasil !", data: executeAuth})
+    } catch (e) {
+      next(e)
     }
   }
 
-  static async createUsers(req: Request, res: Response) {
+  static async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
-        const { username, email } = req.body;
-        
-        const { error } = userSchema.validate({ username, email });
-        if (error) {
-          return res.status(400).json({ message: error.message });
-        }
-        
-        const newUser = await UserService.createUsers(username, email);
-  
-        res.status(200).json({ message: "Berhasil request !", data: newUser });
-    } catch (err: any){
-        ErrorHandle.handle(err, res)
+      const users = await UserService.getAllUsers();
+      res.status(200).json({ message: "Request Berhasil !", data: users });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async createUsers(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data: Users = req.body;
+
+      const newUser = await UserService.createUsers(data);
+
+      res.status(201).json({ message: "Berhasil Meregistrasi User"});
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+
+      const executeDelete = await UserService.deleteUsers(parseInt(id));
+
+      res
+        .status(200)
+        .json({ message: "berhasil menghapus data user dengan id " + id });
+    } catch (e) {
+      next(e);
     }
   }
 }
